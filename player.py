@@ -3,7 +3,7 @@ import mraa
 
 class Player:
     def __init__(self, pin):
-        self._pwm_pin = mraa.Pwm(3)
+        self._pwm_pin = mraa.Pwm(pin)
         self._volume = 0.3
 
     def start(self):
@@ -22,10 +22,8 @@ class Player:
     def play(self, melody):
         print("Playing...")
         self._pwm_pin.write(0)
-
         for idx in range(len(melody)):
             frequency, duration = melody[idx]
-
             if frequency != 0:
                 period = int((10 ** 6) / frequency)
                 print("> {} : {} [{}]".format(frequency, duration, period))

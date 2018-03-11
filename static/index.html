@@ -1,0 +1,166 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="static/piano_style.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="http://www.verovio.org/javascript/latest/verovio-toolkit.js"></script> <!--Only needed for notes display-->
+        <script src="static/piano.js"></script>
+    </head>
+    <body>
+        <div id="keyboardContainer"></div><!-- this will hold the keyboard -->
+
+        <script type="text/javascript">
+
+            $( document ).ready(function() {
+                //create piano with 3 octaves, starting at C4 (lowest key)
+                //shows labels and octave shift buttons
+                var keyboardHTML = htmlForKeyboardWithOctaves(3, octaves.C4, true, true)
+                //render the keyboard in the div
+                $("#keyboardContainer").html(keyboardHTML)
+                //when keys are pressed updatePreview() is called
+                bindKeysToFunction(updatePreviewWithNote)
+                //when the clef is changed updatePreviewWithClef() is called
+                bindClefSelectionToFunction(updatePreviewWithClef)
+                //set the default clef to G4
+                setSelectedClef(clefs.G4)
+            })
+        
+            //this stores all keyboard input
+            var plaineEasieCodes = []
+            var selectedClef = clefs.G4
+        
+            //this is called whenever a piano key is pressed
+            function updatePreviewWithNote(sender, paeNote) {
+                console.log("key pressed is " + paeNote)
+                plaineEasieCodes.push(paeNote)
+                updateNotesSVG()
+            }
+        
+            //this is called when the user changes the clef for display
+            function updatePreviewWithClef(sender, clef) {
+                console.log("clef changed to " + clef)
+                selectedClef = clef
+                updateNotesSVG()
+            }
+        
+            function updateNotesSVG() {
+                //render the notes to an SVG using the Verovio tookit
+                //width of the svg is 800px and note scaling 50%
+                var notesSVG = svgNotesForPlaineEasieCode(plaineEasieCodes.join(""), selectedClef, 800, 50)
+                //insert thes SVG code in our div
+                var svgContainerDiv = $('#svgNotesContainer')
+                svgContainerDiv.html(notesSVG)
+            }
+
+            function make_pizdato() {
+                var ccc = Math.pow(2, 1/12);
+
+                var data = [];
+
+                for (var i=0 ; i<plaineEasieCodes.length ; i++) {
+                    code = plaineEasieCodes[i];
+
+                    var freq = 440;
+                    var len = 1;
+                    var flag = false;
+
+                    for (var j=0 ; j<code.length ; j++) {
+                        var char = code[j];
+
+                        switch(char) {
+                            case '\'':
+                            if (flag) {
+                                freq *= 2;
+                            }
+                            flag = true;
+                            break;
+
+                            case ',':
+                            freq /= 2;
+                            break;
+
+                            case 'C':
+                            break;
+
+                            case 'D':
+                            freq *= Math.pow(ccc, 2);
+                            break;
+
+                            case 'E':
+                            freq *= Math.pow(ccc, 4);
+                            break;
+
+                            case 'F':
+                            freq *= Math.pow(ccc, 5);
+                            break;
+
+                            case 'G':
+                            freq *= Math.pow(ccc, 7);
+                            break;
+
+                            case 'A':
+                            freq *= Math.pow(ccc, 9);
+                            break;
+
+                            case 'B':
+                            freq *= Math.pow(ccc, 11);
+                            break;
+
+                            case 'b':
+                            freq /= ccc;
+                            break;
+
+                            case 'x':
+                            freq *= ccc;
+                            break;
+
+                            case '1':
+                            len = 1;
+                            break;
+
+                            case '2':
+                            len = 1/2;
+                            break;
+
+                            case '4':
+                            len = 1/4;
+                            break;
+
+                            case '8':
+                            len = 1/8;
+                            break;
+
+                            case '6':
+                            len = 1/16;
+                            break;
+
+                            case '3':
+                            len = 1/32;
+                            break;
+                        }
+                    }
+
+                    data.push([freq, len]);
+                }
+
+                $.post({
+                    url: '/play',
+                    data: JSON.stringify(data),
+                    contentType: 'application/json'
+                }, function() {
+                    console.log('ok');
+                });
+            }
+
+            function clear_notes() {
+                console.log('clear');
+                plaineEasieCodes = [];
+                updateNotesSVG();
+            }
+        
+        </script>
+        <button onclick="make_pizdato()">play()</button>
+        <button onclick="clear_notes()">clear()</button>
+        <div id="svgNotesContainer"></div><!-- this will hold the SVG with rendered notes -->
+
+    </body>
+</html>
