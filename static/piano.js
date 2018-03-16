@@ -1,17 +1,3 @@
-/**
- * Copyright notice
- *
- * (c) 2016
- * Anna Neovesky  Anna.Neovesky@adwmainz.de
- * Gabriel Reimers g.a.reimers@gmail.com
- *
- * Digital Academy www.digitale-akademie.de
- * Academy of Sciences and Literatur | Mainz www.adwmainz.de
- *
- * Licensed under The MIT License (MIT)
- */
-
-
 var octaves = {
     C1 : 0, //,,,
     C2 : 1, //,,
@@ -309,3 +295,4 @@ function updateOctaveLabels(){
 function limitToRange(number, min, max) {
     return Math.min(Math.max(min, number), max)
 }
+
